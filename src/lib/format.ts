@@ -33,6 +33,13 @@ export function formatPostalCode(raw: string) {
   return raw.replace(/\D/g, '').slice(0, 4);
 }
 
+export function formatPhone(raw: string) {
+  const digits = raw.replace(/\D/g, '').slice(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
+  return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+}
+
 export function cardBrand(cardNumber: string) {
   const digits = cardNumber.replace(/\D/g, '');
   if (digits.startsWith('4')) return 'Visa';

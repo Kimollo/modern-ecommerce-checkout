@@ -1,3 +1,4 @@
+import { SA_BANKS } from '../data/banks';
 import { SA_PROVINCES } from '../data/provinces';
 import type { PaymentDetails, ShippingDetails } from '../types';
 
@@ -5,7 +6,7 @@ export type ShippingErrors = Partial<
   Record<'email' | 'firstName' | 'lastName' | 'address' | 'city' | 'state' | 'postalCode' | 'phone', string>
 >;
 
-export type PaymentErrors = Partial<Record<'cardName' | 'cardNumber' | 'expiry' | 'cvv', string>>;
+export type PaymentErrors = Partial<Record<'cardName' | 'cardNumber' | 'expiry' | 'cvv' | 'bank' | 'phone', string>>;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const POSTAL_PATTERN = /^\d{4}$/;
@@ -65,6 +66,16 @@ export function validateExpiry(value: string) {
 }
 
 export function validatePayment(payment: PaymentDetails): PaymentErrors {
+  if (payment.method === 'eft') {
+    if (!SA_BANKS.some((bank) => bank === payment.bank)) return { bank: 'Select your bank.' };
+    return {};
+  }
+  if (payment.method === 'capitec') {
+    const digits = payment.phone.replace(/\D/g, '');
+    if (digits.length !== 10) return { phone: 'Enter a 10-digit mobile number.' };
+    return {};
+  }
+
   const errors: PaymentErrors = {};
   const digits = payment.cardNumber.replace(/\D/g, '');
   if (payment.cardName.trim().length < 2) errors.cardName = 'Enter the name on the card.';

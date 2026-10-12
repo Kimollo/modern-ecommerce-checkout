@@ -3,7 +3,7 @@ import { ChevronDown, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { DeliveryMethod, OrderSummary, PaymentDetails, ShippingDetails } from '../../types';
 import { estimateDelivery } from '../../lib/delivery';
-import { createOrderId, formatCardNumber, formatMoney } from '../../lib/format';
+import { cardBrand, createOrderId, formatCardNumber, formatMoney } from '../../lib/format';
 import { priceCart } from '../../lib/pricing';
 import { cx, focusRing } from '../../lib/styles';
 import {
@@ -40,10 +40,13 @@ const EMPTY_SHIPPING: ShippingDetails = {
 };
 
 const EMPTY_PAYMENT: PaymentDetails = {
+  method: 'card',
   cardName: '',
   cardNumber: '',
   expiry: '',
   cvv: '',
+  bank: 'Capitec',
+  phone: '',
 };
 
 const TITLES: Record<CheckoutStep, string> = {
@@ -149,6 +152,10 @@ export function CheckoutModal() {
   const updatePayment = (patch: Partial<PaymentDetails>) => {
     setPayment((current) => ({ ...current, ...patch }));
     setDeclineMessage(null);
+    if (patch.method) {
+      setPaymentErrors({});
+      return;
+    }
     setPaymentErrors((current) => {
       const next = { ...current };
       for (const key of Object.keys(patch) as (keyof PaymentErrors)[]) delete next[key];
@@ -172,6 +179,8 @@ export function CheckoutModal() {
 
   const fillCard = (kind: 'success' | 'decline') => {
     setPayment({
+      ...payment,
+      method: 'card',
       cardName: payment.cardName.trim() || `${shipping.firstName} ${shipping.lastName}`.trim() || 'Alex Morgan',
       cardNumber: formatCardNumber(kind === 'success' ? SUCCESS_CARD : DECLINE_CARD),
       expiry: '12/30',
@@ -193,7 +202,7 @@ export function CheckoutModal() {
       setSubmitting(false);
       return;
     }
-    if (isDeclineCard(payment.cardNumber)) {
+    if (payment.method === 'card' && isDeclineCard(payment.cardNumber)) {
       setSubmitting(false);
       setDeclineMessage('This card was declined. Use the demo success card 4242 4242 4242 4242, or any other valid number.');
       return;
@@ -216,7 +225,10 @@ export function CheckoutModal() {
       shippingDetails: trimShipping(shipping),
       estimatedDelivery: estimateDelivery(delivery),
       placedAt: new Date().toISOString(),
-      paymentLast4: payment.cardNumber.replace(/\D/g, '').slice(-4),
+      paymentMethod: payment.method,
+      paymentDetail:
+        payment.method === 'card' ? cardBrand(payment.cardNumber) : payment.method === 'eft' ? payment.bank : payment.phone.trim(),
+      paymentLast4: payment.method === 'card' ? payment.cardNumber.replace(/\D/g, '').slice(-4) : '',
     };
     setOrder(summary);
     setStep(4);

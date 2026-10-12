@@ -191,7 +191,7 @@ export const useCartStore = create<CartState>()((set, get) => {
     applyPromo: (code) => {
       const normalized = code.trim().toUpperCase();
       if (!PROMO_CODES[normalized]) {
-        set({ promoError: normalized ? 'That code is not recognized.' : 'Enter a promo code.' });
+        set({ promoError: 'Invalid promo code' });
         return;
       }
       setAndStore({ promoCode: normalized, promoError: null });

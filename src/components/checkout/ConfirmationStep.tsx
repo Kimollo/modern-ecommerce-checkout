@@ -91,12 +91,18 @@ export function ConfirmationStep({ order, onDone }: { order: OrderSummary; onDon
         </div>
         <Line label={VAT_LABEL} value={formatMoney(order.tax)} valueClassName="text-stone-500" />
       </dl>
-      <p className="mt-3 text-xs text-stone-500">Paid with card ending {order.paymentLast4}. This is a simulated charge.</p>
+      <p className="mt-3 text-xs text-stone-500">{paymentLine(order)} This is a simulated charge.</p>
       <button type="button" className={cx(primaryButtonClass, 'mt-8 w-full')} onClick={onDone}>
         Continue shopping
       </button>
     </div>
   );
+}
+
+function paymentLine(order: OrderSummary) {
+  if (order.paymentMethod === 'eft') return `Paid with Instant EFT / Ozow (${order.paymentDetail}).`;
+  if (order.paymentMethod === 'capitec') return `Paid with Capitec Pay (${order.paymentDetail}).`;
+  return `Paid with Credit / Debit Card (${order.paymentDetail}) ending ${order.paymentLast4}.`;
 }
 
 function Line({

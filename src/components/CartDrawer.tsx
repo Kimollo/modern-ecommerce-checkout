@@ -1,31 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Trash2, X } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { formatMoney } from '../lib/format';
 import { EXPRESS_SHIPPING_CENTS, LOCKER_SHIPPING_CENTS, VAT_LABEL, priceCart } from '../lib/pricing';
-import { cx, focusRing, primaryButtonClass, quietButtonClass, secondaryButtonClass } from '../lib/styles';
+import { cx, focusRing, primaryButtonClass, quietButtonClass } from '../lib/styles';
 import { useBodyLock } from '../hooks/useBodyLock';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { ProductImage } from './ProductImage';
 import { QuantityStepper } from './QuantityStepper';
 import { FreeShippingMeter } from './FreeShippingMeter';
 import { PriceBreakdownList } from './PriceBreakdownList';
+import { PromoCodeField } from './PromoCodeField';
 
 export function CartDrawer() {
   const isOpen = useCartStore((state) => state.isOpen);
   const items = useCartStore((state) => state.items);
   const promoCode = useCartStore((state) => state.promoCode);
-  const promoError = useCartStore((state) => state.promoError);
   const closeCart = useCartStore((state) => state.closeCart);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
-  const applyPromo = useCartStore((state) => state.applyPromo);
-  const clearPromo = useCartStore((state) => state.clearPromo);
   const openCheckout = useCartStore((state) => state.openCheckout);
   const panelRef = useRef<HTMLElement | null>(null);
-  const [code, setCode] = useState('');
-  const [promoDirty, setPromoDirty] = useState(false);
   const count = items.reduce((total, item) => total + item.quantity, 0);
   const breakdown = priceCart(items, promoCode, 'standard');
 
@@ -138,50 +134,7 @@ export function CartDrawer() {
               ))}
             </ul>
             <div className="space-y-4 border-t border-stone-200 px-5 py-5">
-              {promoCode ? (
-                <div className="flex items-center justify-between rounded-2xl bg-stone-50 px-3 py-2.5 text-sm">
-                  <p>
-                    <span className="font-medium">{promoCode}</span>
-                    <span className="text-stone-500"> · 10% off applied</span>
-                  </p>
-                  <button type="button" className={quietButtonClass} onClick={clearPromo}>
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    setPromoDirty(false);
-                    applyPromo(code);
-                  }}
-                  className="flex gap-2"
-                >
-                  <label htmlFor="promo-code" className="sr-only">
-                    Promo code
-                  </label>
-                  <input
-                    id="promo-code"
-                    value={code}
-                    onChange={(event) => {
-                      setCode(event.target.value);
-                      setPromoDirty(true);
-                    }}
-                    placeholder="Promo code"
-                    autoComplete="off"
-                    className="w-full rounded-full border border-stone-300 px-4 py-2.5 text-sm outline-none focus-visible:border-stone-900 focus-visible:ring-2 focus-visible:ring-stone-900/10"
-                  />
-                  <button type="submit" className={cx(secondaryButtonClass, 'shrink-0')}>
-                    Apply
-                  </button>
-                </form>
-              )}
-              {promoError && !promoDirty && (
-                <p role="alert" className="text-xs text-red-700">
-                  {promoError}
-                </p>
-              )}
-              {!promoCode && !promoError && <p className="text-xs text-stone-500">Try SAVE10 for 10% off.</p>}
+              <PromoCodeField />
               <FreeShippingMeter subtotal={breakdown.subtotal} />
               <PriceBreakdownList breakdown={breakdown} shippingLabel="Door-to-door" />
               <p className="text-xs text-stone-500">

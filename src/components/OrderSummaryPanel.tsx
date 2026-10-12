@@ -5,6 +5,7 @@ import { deliveryLabel } from '../lib/delivery';
 import { useCartStore } from '../store/cartStore';
 import { ProductImage } from './ProductImage';
 import { PriceBreakdownList } from './PriceBreakdownList';
+import { PromoCodeField } from './PromoCodeField';
 
 export function OrderSummaryPanel({ delivery }: { delivery: DeliveryMethod }) {
   const items = useCartStore((state) => state.items);
@@ -29,7 +30,8 @@ export function OrderSummaryPanel({ delivery }: { delivery: DeliveryMethod }) {
           </li>
         ))}
       </ul>
-      <div className="mt-5">
+      <div className="mt-5 space-y-4">
+        <PromoCodeField />
         <PriceBreakdownList breakdown={breakdown} shippingLabel={deliveryLabel(delivery)} />
       </div>
     </div>

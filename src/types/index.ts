@@ -71,11 +71,16 @@ export interface ShippingDetails {
 
 export type DeliveryMethod = 'standard' | 'express' | 'locker';
 
+export type PaymentMethod = 'card' | 'eft' | 'capitec';
+
 export interface PaymentDetails {
+  method: PaymentMethod;
   cardName: string;
   cardNumber: string;
   expiry: string;
   cvv: string;
+  bank: string;
+  phone: string;
 }
 
 export interface OrderSummary {
@@ -91,5 +96,8 @@ export interface OrderSummary {
   shippingDetails: ShippingDetails;
   estimatedDelivery: string;
   placedAt: string;
+  paymentMethod: PaymentMethod;
+  /** Card brand, selected bank, or Capitec mobile number. */
+  paymentDetail: string;
   paymentLast4: string;
 }
